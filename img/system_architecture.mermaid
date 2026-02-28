@@ -1,0 +1,48 @@
+graph TB
+    subgraph Frontend [前端 (uni-app / Vue)]
+        FE_Pages[Pages: 学习页/个人页/设置]
+        FE_API[utils/api.js: 统一请求封装]
+        FE_Recorder[录音管理器]
+        FE_Player[音频播放器]
+    end
+
+    subgraph Backend [后端 (FastAPI)]
+        BE_Main[main.py: 路由/中间件/静态资源]
+        BE_Services[Services 层: 业务逻辑]
+        
+        subgraph AI_Modules [AI & 音频处理模块]
+            S_ASR[ASR服务 (FunASR/兜底)]
+            S_SER[情感服务 (Transformers/规则)]
+            S_TTS[TTS服务 (在线/离线/缓存)]
+            S_Audio[音频处理 (pydub/FFmpeg)]
+        end
+        
+        BE_DB[Database: SQLAlchemy ORM]
+    end
+
+    subgraph Storage [数据与存储]
+        DB[(SQLite: sql_app.db)]
+        FS_Rec[Uploads: 录音文件]
+        FS_TTS[Uploads: TTS缓存]
+        FS_Model[Model Cache: 本地模型]
+    end
+
+    FE_Pages --> FE_API
+    FE_Recorder --> FE_API
+    FE_Player --> FE_API
+    
+    FE_API -- HTTP REST API --> BE_Main
+    
+    BE_Main --> BE_Services
+    BE_Services --> S_ASR
+    BE_Services --> S_SER
+    BE_Services --> S_TTS
+    BE_Services --> S_Audio
+    
+    BE_Services --> BE_DB
+    BE_DB <--> DB
+    
+    S_TTS --> FS_TTS
+    S_ASR --> FS_Model
+    S_SER --> FS_Model
+    BE_Main -- 接收上传 --> FS_Rec

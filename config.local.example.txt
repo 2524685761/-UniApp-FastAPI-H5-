@@ -1,0 +1,44 @@
+# 复制本文件为 config.local.txt，然后把你的 Key 填进去（不要把 Key 发给任何人/不要提交到仓库）
+# V-API 使用 OpenAI 兼容协议：Base URL 用 https://api.v36.cm/v1
+# 官网：https://api.v36.cm/
+
+# ====== 聊天（大模型） ======
+LLM_PROVIDER=openai
+OPENAI_BASE_URL=https://api.v36.cm/v1
+OPENAI_API_KEY=sk-REPLACE_ME
+OPENAI_MODEL=gpt-3.5-turbo
+
+# ====== 更自然的语音（TTS） ======
+# local：本地 pyttsx3（生硬但离线）
+# openai_compat：走 OpenAI 兼容的 /audio/speech（更自然，需计费）
+TTS_PROVIDER=openai_compat
+# 备注：是否支持 qwen3-tts-flash 取决于你在 V-API 的分组权限；不支持会在后端自动回退到 tts-1
+OPENAI_TTS_MODEL=qwen3-tts-flash
+OPENAI_TTS_VOICE=alloy
+OPENAI_TTS_SPEED=1.0
+# 可选：如果你的分组后续支持“带 instructions 的 TTS 模型”，再打开这一行
+# OPENAI_TTS_INSTRUCTIONS=你是温柔可爱的幼儿园老师，用非常亲切、活泼、软萌的语气说普通话，发音标准清晰，语速稍慢，结尾上扬一点点，多一点微笑感。
+
+
+# ====== 情感识别（可选） ======
+# 默认关闭 HuggingFace 情感模型（国内常需要 VPN 且首次下载很慢），只使用规则引擎（无需联网）。
+# 如需启用 AI 情感模型：
+# EMOTION_AI_ENABLED=true
+#
+# 如果你已经提前把模型下载到了本机缓存，并希望离线运行：
+# HF_HUB_OFFLINE=true
+# TRANSFORMERS_OFFLINE=true
+
+# ====== 直连通义千问（DashScope）TTS（不走中转） ======
+# 使用方式：把上面的 TTS_PROVIDER 改成 dashscope，并填入 DASHSCOPE_API_KEY
+# 文档：
+# - https://help.aliyun.com/zh/model-studio/qwen-tts
+# - https://help.aliyun.com/zh/model-studio/qwen-tts-api
+#
+# TTS_PROVIDER=dashscope
+# DASHSCOPE_API_KEY=your_dashscope_api_key
+# DASHSCOPE_TTS_MODEL=qwen3-tts-flash
+# DASHSCOPE_TTS_VOICE=Cherry
+# DASHSCOPE_TTS_FORMAT=mp3
+# （可选）如果你的地区/账号使用的 endpoint 不同，可覆盖：
+# DASHSCOPE_TTS_ENDPOINT=https://dashscope.aliyuncs.com/api/v1/services/aigc/speech/synthesis

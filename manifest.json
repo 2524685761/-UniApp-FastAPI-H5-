@@ -1,0 +1,12 @@
+{
+    "name": "emotional-learning-app",
+    "appid": "",
+    "description": "情感伴学国家通用语学习系统",
+    "versionName": "1.0.0",
+    "versionCode": "100",
+    "transformPx": false,
+    "app-plus": {
+        "modules": {}
+    }
+}
+

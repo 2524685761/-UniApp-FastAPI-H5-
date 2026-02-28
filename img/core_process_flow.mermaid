@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant User as 学习者
+    participant FE as 前端(uni-app)
+    participant BE as 后端(FastAPI)
+    participant TTS as TTS服务(含缓存)
+    participant FS as 文件存储
+
+    User->>FE: 点击“播放示范”
+    FE->>BE: GET /tts?text=“你好”&...
+    
+    rect rgb(240, 248, 255)
+        Note over BE, TTS: 缓存检查阶段
+        BE->>TTS: 生成缓存Key (MD5: provider+model+text...)
+        TTS->>FS: 检查 uploads/tts/{key}.mp3 是否存在
+    end
+    
+    alt 缓存命中 (Cache Hit)
+        FS-->>TTS: 文件存在
+        TTS-->>BE: 返回文件路径
+    else 缓存未命中 (Cache Miss)
+        TTS->>TTS: 调用在线API / 本地引擎生成
+        TTS->>FS: 写入文件 uploads/tts/{key}.mp3
+        TTS-->>BE: 返回新文件路径
+    end
+    
+    BE-->>FE: 返回音频URL (http://.../uploads/tts/...)
+    FE->>User: 播放音频

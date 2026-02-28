@@ -1,0 +1,14 @@
+# 可选：AI 增强依赖（需要时再安装）
+# pip install -r backend/requirements_ai.txt
+
+funasr>=1.0.0
+modelscope>=1.9.0
+transformers>=4.30.0
+torch>=2.0.0
+torchaudio>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+librosa>=0.10.0
+websocket-client>=1.6.0
+
+

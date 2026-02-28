@@ -1,0 +1,37 @@
+.env.local
+backend/.env.local
+**/.env.local
+**/*.env.local
+secrets/
+**/secrets/
+
+# local secret config (NEVER commit)
+config.local.txt
+backend/config.local.txt
+
+# runtime artifacts / user data
+uploads/
+backend/uploads/
+**/uploads/
+unpackage/
+**/unpackage/
+*.db
+*.sqlite
+*.sqlite3
+
+# Cursor / local debug artifacts
+.cursor/debug.log
+.cursor/*.log
+.cursor/terminals/
+
+# AI model caches (large). Keep local, don't commit.
+model_cache/
+
+# local dev environment
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+
+.cursor/
