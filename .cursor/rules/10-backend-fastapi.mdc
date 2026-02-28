@@ -1,0 +1,28 @@
+---
+description: 后端 FastAPI 规则：接口写法、常见问题与修复
+globs:
+  - "backend/**/*.py"
+---
+
+后端技术栈：
+- FastAPI 应用入口：`backend/main.py`
+- 业务服务：`backend/services/*.py`
+- 配置加载：`backend/config.py`（会加载 `config.local.txt`）
+
+规则：
+- 新增接口时：
+  - 路由函数要薄（只做参数校验/组织返回）；核心逻辑放到 service。
+  - 返回尽量用 JSON 友好的 dict；返回文件用 `FileResponse`。
+- 排查启动报错时：
+  - 优先执行 `python -c "import backend.main"` 来捕捉 import 阶段异常。
+  - Windows 调试尽量不要用 `--reload`（子进程会让栈信息更难看/更难复现）。
+- 性能与稳定性：
+  - 充分利用 `backend/services/tts_service.py` 的缓存机制（重复文本直接命中缓存）。
+  - 避免在请求路径里下载/更新模型；需要的话用后台预热 `preload_model_async()`。
+
+AI 相关运行时默认建议：
+- FunASR：`AutoModel(..., disable_update=True)` 跳过在线更新检查（更快/更不依赖代理）。
+- 情感识别模型：
+  - `EMOTION_AI_ENABLED=false` 时：不要实例化 HF pipeline（避免联网/下载）。
+  - `EMOTION_AI_ENABLED=true` 时：优先支持 `EMOTION_MODEL_PATH`（本地路径）+ 离线开关（`HF_HUB_OFFLINE`/`TRANSFORMERS_OFFLINE`）。
+

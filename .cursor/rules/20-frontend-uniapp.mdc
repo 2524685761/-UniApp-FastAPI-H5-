@@ -1,0 +1,27 @@
+---
+description: 前端 uni-app/Vue 规则：调用后端、BaseURL 端口调试
+globs:
+  - "pages/**/*.vue"
+  - "App.vue"
+  - "main.js"
+  - "utils/**/*.js"
+---
+
+前端技术栈：
+- uni-app 页面：`pages/**`
+- 统一 API 封装：`utils/api.js`
+
+规则：
+- 所有后端请求统一走 `utils/api.js`（`apiGet` / `apiPost` / `apiUpload` / `buildURL`），不要在页面里硬编码 URL。
+- 如果请求跑到错误端口：
+  - `getBaseURL()` 会读取 `uni.getStorageSync('api_base_url')`
+  - 清空该 key 后会回到默认 `http://127.0.0.1:8000`
+- 新增 API 调用：
+  - 用 `buildURL('/path')` 拼接
+  - 路径要与 `backend/main.py` 的接口一致
+
+调试建议（可提示用户/测试人员）：
+- H5 的 DevTools 控制台里（如果 uni 映射到 localStorage）：
+  - `localStorage.removeItem('api_base_url')`
+- 或者在“设置页”加一个“重置后端地址”的按钮
+

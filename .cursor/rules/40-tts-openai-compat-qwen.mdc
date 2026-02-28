@@ -1,0 +1,44 @@
+---
+description: TTS（V-API/OpenAI 兼容 + Qwen TTS）规则：模型、音色、缓存与排错
+globs:
+  - "backend/services/tts_service.py"
+  - "config.local*.txt"
+  - "pages/**/*.vue"
+  - "utils/api.js"
+---
+
+本仓库 TTS 设计：
+- 后端统一从 `backend/services/tts_service.py:generate_tts_audio()` 生成语音，并落盘缓存到 `uploads/tts/`。
+- 主要提供方：
+  - `local`：pyttsx3（离线但音色偏机械）
+  - `openai_compat`：OpenAI 兼容 `/audio/speech`（可接 V-API，例如 `https://api.v36.cm/v1`）
+  - `dashscope`：直连阿里云（可选）
+
+## 配置约定（config.local.txt）
+- 使用 V-API（OpenAI 兼容）Qwen TTS：
+  - `TTS_PROVIDER=openai_compat`
+  - `OPENAI_BASE_URL=https://api.v36.cm/v1`
+  - `OPENAI_API_KEY=...`
+  - `OPENAI_TTS_MODEL=qwen3-tts-flash`
+  - `OPENAI_TTS_VOICE=Cherry`（或其他音色）
+  - `OPENAI_TTS_SPEED=1.0`（可选）
+
+## 缓存策略（非常重要）
+- 缓存 key 由：provider + model + voice + speed + instructions + text (+ base_url/endpoint) 组成。
+- 命中缓存时不会请求外网，速度极快。
+- 修改音色/模型后“听起来没变”，通常是因为命中旧缓存：
+  - 解决：清空 `uploads/tts/` 或更换文本触发重新生成。
+
+## 兼容性与返回格式
+一些中转服务在调用 Qwen TTS 时可能返回：
+- 直接音频 bytes（标准情况）
+- 或 JSON（包含 `output.audio.url`），需要再下载音频
+本仓库 `tts_service.py` 已做兼容处理；排错时关注日志里返回 `Content-Type` 与 HTTP 状态码。
+
+## 常见报错与处理
+- `Voice 'alloy' is not supported`
+  - 说明当前请求音色仍是 `alloy`（配置未加载/被旧环境变量覆盖/缓存）
+  - 优先检查：`config.local.txt` 生效、后端进程是否重启、是否清空缓存
+- “模型不支持/403/400”
+  - 平台权限可能不包含该模型；后端会尝试回退到 `tts-1`（如你不想回退可调整策略）
+

@@ -1,0 +1,41 @@
+---
+description: AI 模型离线与缓存（FunASR / HuggingFace / model_cache）
+globs:
+  - "backend/**/*.py"
+  - "scripts/**/*.py"
+  - "config.local*.txt"
+---
+
+本仓库涉及多类 AI 模型下载与缓存：ASR（FunASR/ModelScope）与情感识别（Transformers/HuggingFace）。
+目标：默认不依赖 VPN；需要时能“一次下载、永久离线”。
+
+## 通用原则
+- 运行期尽量不做“检查更新/在线拉取”，避免启动慢、网络不稳定、需要代理。
+- 缓存建议落在项目目录 `model_cache/`（方便迁移/备份/不丢失）。
+- 本地离线优先于系统全局缓存（更可控）。
+
+## FunASR（ASR）离线与加速
+- 文件：`backend/services/asr_service.py`
+- 建议：`AutoModel(..., disable_update=True)` 关闭在线更新检查（启动更快）。
+- 首次下载来自 ModelScope，属于“第一次慢、后面快”的正常现象。
+- 如果需要完全离线：提前在有网环境把模型下载到本机缓存（ModelScope 的默认 cache 目录），或提供离线镜像。
+
+## HuggingFace（情感识别）离线与加速
+- 文件：`backend/services/emotion_service.py`
+- 推荐配置（写入 `config.local.txt`）：
+  - `EMOTION_AI_ENABLED=true`：开启 AI 情感识别
+  - `HF_HOME=./model_cache/huggingface`：把 HF 缓存放到项目目录（持久化）
+  - `HF_HUB_OFFLINE=true`、`TRANSFORMERS_OFFLINE=true`：离线模式（禁止联网）
+  - `EMOTION_MODEL_PATH=...`：强制从本地快照目录加载（最稳：完全不触发外网请求）
+
+### 一次性下载情感模型到本地（联网时执行一次）
+- 脚本：`scripts/cache_emotion_model.py`
+- 执行：`python scripts/cache_emotion_model.py`
+- 完成后：把 `EMOTION_MODEL_PATH` 指向下载出来的 snapshots 目录（脚本/工具可自动写入）。
+
+## 常见问题
+- “为什么启动还在连外网？”
+  - 检查 `config.local.txt` 是否被正确加载（后端入口应先 import `backend/config.py`）。
+  - 确认 `HF_HUB_OFFLINE` 与 `TRANSFORMERS_OFFLINE` 在运行进程里为 `"1"`。
+  - 优先使用 `EMOTION_MODEL_PATH` 直接加载本地目录。
+

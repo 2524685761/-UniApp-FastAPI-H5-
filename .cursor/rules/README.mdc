@@ -1,0 +1,78 @@
+---
+description: Cursor 项目规则（Agent Skills）使用说明与提问模板
+globs:
+  - "**/*"
+---
+
+本目录 `/.cursor/rules/` 是给 Cursor/Agent 用的“项目技能库（Agent Skills）”。
+目标：你用自然语言提需求时，Agent 能按场景自动匹配规则、少走弯路、一次做对。
+
+## 你怎么用（最简单）
+- 直接在对话里说你要做什么 + 场景约束（前端/后端/离线/端口/是否要兼容 Windows）。
+- 如果是排错，把“报错堆栈/日志片段/你期望的行为”贴上来（注意密钥要脱敏）。
+
+## 规则文件对应什么能力
+- `00-project-overview.mdc`
+  - 项目总览、全局约定（Windows 稳定、默认不依赖 VPN、配置真源、仓库卫生）
+- `10-backend-fastapi.mdc`
+  - 后端接口写法、启动排错、AI 模型相关默认建议
+- `20-frontend-uniapp.mdc`
+  - 前端请求封装规范、BaseURL/端口调试（解决 8001/8000 混乱）
+- `30-ai-models-offline.mdc`
+  - FunASR / HuggingFace 的离线化与缓存（`model_cache/`、离线开关、下载脚本）
+- `40-tts-openai-compat-qwen.mdc`
+  - TTS（V-API/OpenAI 兼容 + Qwen）配置、音色、缓存、返回格式兼容、常见报错
+- `50-debugging-runbook.mdc`
+  - “从现象到结论”的排错路线图（端口、缓存、VPN、启动失败）
+- `60-security-secrets.mdc`
+  - 安全规范：不泄露、不提交、如何脱敏提供信息
+
+## 最实用的提问模板（直接复制改字）
+
+### 模板 A：我想新增一个功能（后端 + 前端）
+我想新增功能：`<一句话描述>`
+约束：
+- 前端：`uni-app`，请求必须走 `utils/api.js`
+- 后端：FastAPI，逻辑放 `backend/services/**`
+- Windows 需要稳定运行
+验收标准：
+- `...`
+请你直接改代码实现，并告诉我改了哪些文件。
+
+### 模板 B：我想切换/优化 TTS（音色/模型/更快/更稳定）
+我现在用的 TTS：
+- provider=`openai_compat`
+- base_url=`https://api.v36.cm/v1`
+目标：
+- 模型=`qwen3-tts-flash`
+- 音色=`Cherry`（或 `Katerina`）
+- 命中缓存时要秒出（不重新请求）
+问题现象（可选）：`<比如：还是男声/还是 alloy/很慢>`
+请你检查配置加载、缓存命中逻辑，并给出最少改动的修复。
+
+### 模板 C：我想把情感识别彻底离线（不需要 VPN）
+目标：
+- 第一次允许联网下载
+- 之后离线运行，关机不丢
+现状日志（粘贴）：`<huggingface.co timeout...>`
+请你：
+- 配置 `HF_HOME` 到项目目录
+- 写 `EMOTION_MODEL_PATH` 指向本地快照
+- 打开离线开关，保证不再访问外网
+
+### 模板 D：前端请求总是跑到 8001（或端口不对）
+现象：前端请求 URL 变成了 `http://127.0.0.1:8001/...`，但我后端在 `8000`
+请你定位 baseURL 的来源（storage 缓存 key），并提供：
+- 一键重置 baseURL 的方式（代码/按钮/控制台）
+- 防止再次误配的方案（可选）
+
+### 模板 E：后端启动失败/报错
+启动方式：`run_backend.bat` 或 `uvicorn backend.main:app`
+报错全文：`<粘贴 Traceback>`
+期望：能正常打开 `/docs`
+请你按“先 import 检查 → 再端口占用 → 再依赖/编码问题”的顺序修复，并自己跑一次验证。
+
+## 脱敏规则（非常重要）
+- Key/Token 只保留前 4 + 后 4：例如 `sk-1234...abcd`
+- 可以提供 base_url / model / voice / 端口，但不要提供 Authorization header 全文。
+

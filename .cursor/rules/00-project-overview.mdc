@@ -1,0 +1,29 @@
+---
+description: 项目概览 + 全局约定（本仓库）
+globs:
+  - "**/*"
+---
+
+你正在维护一个包含“前端 + 后端 + AI 音频能力”的仓库：
+- 前端：uni-app / Vue（页面在 `pages/**`，统一 API 封装在 `utils/api.js`）
+- 后端：FastAPI（入口 `backend/main.py`，业务服务在 `backend/services/**`）
+- AI/音频：ASR（FunASR）、TTS（OpenAI 兼容 / V-API）、情感识别（Transformers/HF 或规则引擎）
+
+全局目标：
+- 尽量做“小而准”的改动；优先保证 Windows 上运行稳定。
+- 默认不依赖 VPN；能离线就离线，至少要有降级/兜底。
+- 把 `config.local.txt` 视为本地配置真源；严禁提交任何密钥/令牌。
+
+约定：
+- 后端接口定义在 `backend/main.py`；复杂逻辑放在 `backend/services/**`。
+- 调试“前端连不上后端/端口不对”时，优先检查：
+  - 前端缓存的 baseURL：`uni.getStorageSync('api_base_url')`
+  - 后端实际监听端口（默认 `8000`）
+- AI 模型相关：
+  - 运行时尽量避免联网检查更新（会慢/可能需要代理）。
+  - 能放到项目目录下持久化缓存（`model_cache/`）就不要依赖系统缓存。
+
+安全与仓库卫生：
+- 不要在日志/代码里输出 API Key。
+- `uploads/`（用户数据/生成音频）和 `model_cache/`（模型缓存）不要提交到 git（可本地持久化）。
+
